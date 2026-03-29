@@ -134,6 +134,8 @@ static uint32_t FindUncompressCall(FILE * file, uint32_t entry)
                 uint32_t pool_addr = cur_insn[0].address + cur_insn[0].detail->arm.operands[1].mem.disp + 8;
                 uint32_t _start_ModuleParams_off = READ32(&code[pool_addr - entry]);
                 CompressedStaticEnd = READ32(&code[_start_ModuleParams_off - entry + 20]);
+                cs_close(&cap);
+                cs_free(insn, count);
                 return _start_ModuleParams_off;
             }
             else if (
@@ -163,12 +165,15 @@ static uint32_t FindUncompressCall(FILE * file, uint32_t entry)
                 )
             {
                 uint32_t pool_addr = cur_insn[0].address + cur_insn[0].detail->arm.operands[1].mem.disp + 8;
+                cs_close(&cap);
+                cs_free(insn, count);
                 return READ32(&code[pool_addr - entry]);
             }
         }
         offset = insn[count - 1].address + insn[count - 1].size - entry;
         cs_free(insn, count);
     } while (offset < 0x800);
+    cs_close(&cap);
     return 0;
 }
 
